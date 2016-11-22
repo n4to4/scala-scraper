@@ -7,8 +7,7 @@ import net.ruippeixotog.scalascraper.model._
 import org.jsoup.Connection.Method._
 import org.jsoup.Connection.Response
 import org.jsoup.{ Connection, Jsoup }
-import scala.collection.convert.WrapAsJava._
-import scala.collection.convert.WrapAsScala._
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 /**
@@ -32,7 +31,7 @@ class JsoupBrowser(val userAgent: String = "jsoup/1.8") extends Browser {
     executePipeline(Jsoup.connect(url).method(GET))
 
   def post(url: String, form: Map[String, String]): Document =
-    executePipeline(Jsoup.connect(url).method(POST).data(form))
+    executePipeline(Jsoup.connect(url).method(POST).data(form.asJava))
 
   def parseFile(file: File, charset: String): Document =
     JsoupDocument(Jsoup.parse(file, charset))
@@ -53,7 +52,7 @@ class JsoupBrowser(val userAgent: String = "jsoup/1.8") extends Browser {
   def requestSettings(conn: Connection): Connection = conn
 
   protected[this] def defaultRequestSettings(conn: Connection): Connection =
-    conn.cookies(cookieMap).
+    conn.cookies(cookieMap.asJava).
       userAgent(userAgent).
       header("Accept", "text/html,application/xhtml+xml,application/xml").
       header("Accept-Charset", "utf-8").
@@ -65,7 +64,7 @@ class JsoupBrowser(val userAgent: String = "jsoup/1.8") extends Browser {
 
   protected[this] def processResponse(res: Connection.Response): Document = {
     lazy val doc = res.parse
-    cookieMap ++= res.cookies
+    cookieMap ++= res.cookies.asScala
     if (res.hasHeader("Location")) get(res.header("Location")) else JsoupDocument(doc)
   }
 
@@ -82,13 +81,13 @@ object JsoupBrowser {
   case class JsoupElement(underlying: org.jsoup.nodes.Element) extends Element {
     def tagName = underlying.tagName
     def parent = Option(underlying.parent).map(JsoupElement)
-    def children = underlying.children.toIterable.map(JsoupElement)
-    def siblings = underlying.siblingElements.map(JsoupElement)
+    def children = underlying.children.asScala.toIterable.map(JsoupElement)
+    def siblings = underlying.siblingElements.asScala.map(JsoupElement)
 
-    def childNodes = underlying.childNodes.flatMap(JsoupNode.apply)
-    def siblingNodes = underlying.siblingNodes.flatMap(JsoupNode.apply)
+    def childNodes = underlying.childNodes.asScala.flatMap(JsoupNode.apply)
+    def siblingNodes = underlying.siblingNodes.asScala.flatMap(JsoupNode.apply)
 
-    def attrs = underlying.attributes.map { attr => attr.getKey -> attr.getValue }.toMap
+    def attrs = underlying.attributes.asScala.map { attr => attr.getKey -> attr.getValue }.toMap
 
     def hasAttr(name: String) = underlying.hasAttr(name)
 
@@ -103,7 +102,7 @@ object JsoupBrowser {
     def outerHtml = underlying.outerHtml
 
     private[this] def selectUnderlying(cssQuery: String): Iterator[Element] =
-      underlying.select(cssQuery).iterator.map(JsoupElement)
+      underlying.select(cssQuery).asScala.iterator.map(JsoupElement)
 
     def select(cssQuery: String) = ElementQuery(cssQuery, this, selectUnderlying)
   }

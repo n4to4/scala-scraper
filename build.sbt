@@ -6,6 +6,8 @@ version := "1.1.1-SNAPSHOT"
 
 scalaVersion := "2.11.8"
 
+crossScalaVersions := Seq(scalaVersion.value, "2.12.0")
+
 resolvers ++= Seq(
   Resolver.sonatypeRepo("snapshots"),
   "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases")
@@ -16,10 +18,10 @@ libraryDependencies ++= Seq(
   "net.sourceforge.htmlunit"    % "htmlunit"             % "2.23",
   "org.jsoup"                   % "jsoup"                % "1.10.1",
   "org.scalaz"                 %% "scalaz-core"          % "7.2.7",
-  "org.http4s"                 %% "http4s-blaze-server"  % "0.14.11a"             % "test",
-  "org.http4s"                 %% "http4s-dsl"           % "0.14.11a"             % "test",
+  "org.http4s"                 %% "http4s-blaze-server"  % "0.15.0-SNAPSHOT"      % "test",
+  "org.http4s"                 %% "http4s-dsl"           % "0.15.0-SNAPSHOT"      % "test",
   "org.slf4j"                   % "slf4j-nop"            % "1.7.21"               % "test",
-  "org.specs2"                 %% "specs2-core"          % "3.8.5.1"              % "test")
+  "org.specs2"                 %% "specs2-core"          % "3.8.6"                % "test")
 
 scalariformPreferences := scalariformPreferences.value
   .setPreference(DanglingCloseParenthesis, Prevent)
@@ -27,6 +29,7 @@ scalariformPreferences := scalariformPreferences.value
   .setPreference(PlaceScaladocAsterisksBeneathSecondAsterisk, true)
 
 scalacOptions ++= Seq(
+  "-Ywarn-unused-import",
   "-deprecation",
   "-unchecked",
   "-feature",
